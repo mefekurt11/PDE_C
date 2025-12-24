@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Compression: Transform vs. PDE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* CSS Root and Setup */
+        :root {
+            --primary: #005088;
+            --accent: #11caa0;
+            --bg-cream: #f3f0df;
+            --text-dark: #121212;
+            --text-light: #f3f0df;
+        }
+
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 20px 0; background-color: #e2e8f0; display: grid; place-items: center; min-height: 100vh; font-family: 'DM Sans', sans-serif; }
+
+        /* Slide Container */
+        .slide-container {
+            width: 1280px; height: 720px;
+            background-color: var(--bg-cream);
+            position: relative; overflow: hidden;
+            display: flex; flex-direction: column;
+            padding: 60px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        /* Abstract Background Decoration */
+        .slide-container::before {
+            content: ""; position: absolute; top: -10%; right: -10%;
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(0,80,136,0.1) 0%, transparent 70%);
+            border-radius: 50%; z-index: 0;
+        }
+
+        .slide-title {
+            font-family: 'Merriweather', serif; font-size: 48px; font-weight: 700;
+            color: var(--primary); margin-bottom: 40px; z-index: 1; text-align: left;
+        }
+
+        .content-area { flex-grow: 1; z-index: 1; display: flex; align-items: center; justify-content: center; width: 100%; }
+
+        /* Typography */
+        h1, h2, h3 { margin: 0; }
+        p, li { font-size: 22px; line-height: 1.4; color: var(--text-dark); }
+        .subtitle { font-size: 28px; color: var(--primary); margin-top: 10px; font-style: italic; }
+
+        /* Layouts */
+        .title-layout { text-align: center; justify-content: center; height: 100%; }
+        .title-layout h1 { font-family: 'Merriweather', serif; font-size: 72px; color: var(--text-light); }
+        .title-layout p { color: var(--text-light); }
+
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; width: 100%; }
+        .image-wrapper { width: 100%; height: 400px; border: 4px solid var(--primary); border-radius: 8px; overflow: hidden; background: #fff; }
+        .image-wrapper img { width: 100%; height: 100%; object-fit: contain; }
+
+        .bullet-list ul { list-style: none; padding: 0; }
+        .bullet-list li { position: relative; padding-left: 40px; margin-bottom: 20px; }
+        .bullet-list li::before { content: "\f058"; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; left: 0; color: var(--primary); }
+
+        .formula-container { background: #fff; padding: 25px; border-radius: 12px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); margin: 20px 0; text-align: center; }
+
+        /* Chart Styling */
+        .chart-container { width: 100%; }
+        .bar { display: flex; align-items: center; margin-bottom: 15px; }
+        .bar-label { width: 150px; font-weight: 700; }
+        .bar-track { flex-grow: 1; background: #dcdcdc; height: 30px; border-radius: 15px; overflow: hidden; }
+        .bar-fill { height: 100%; background: var(--primary); color: white; padding-right: 15px; display: flex; align-items: center; justify-content: flex-end; font-weight: 700; font-size: 16px; }
+
+        /* Section Title Layout */
+        .section-header { background-color: var(--primary); color: var(--text-light); justify-content: center; align-items: center; text-align: center; }
+        .section-header h2 { font-size: 80px; margin-bottom: 20px; font-family: 'Merriweather', serif; }
+        .section-header hr { width: 100px; border: 2px solid var(--accent); margin: 20px auto; }
+    </style>
+</head>
+<body>
+
+<!-- Slide 1: Title Slide -->
+<div class="slide-container" style="background-color: var(--primary); align-items: center; justify-content: center;">
+    <div class="title-layout">
+        <h1>Image Compression Project</h1>
+        <p class="subtitle" style="color: var(--accent); font-size: 36px;">Transform Coding vs. PDE-Based Inpainting</p>
+        <div style="margin-top: 60px; color: white;">
+            <p><strong>MUSTAFA EFE KURT</strong></p>
+            <p>Student ID: 514251313</p>
+            <p>Istanbul Technical University | TEL519E</p>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 2: Problem Statement -->
+<div class="slide-container">
+    <h2 class="slide-title">The Challenge of Modern Imaging</h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div class="bullet-list">
+                <ul>
+                    <li><strong>Data Burden:</strong> High-resolution formats strain storage and transmission bandwidth.</li>
+                    <li><strong>Conventional Limits:</strong> JPEG (DCT) and JPEG2000 (DWT) produce non-semantic distortions.</li>
+                    <li><strong>Second-Generation Coding:</strong> Exploiting semantic edges and homogeneous diffusion for ultra-high compression.</li>
+                    <li><strong>Implementation:</strong> High-performance C11 codec using JBIG and Multigrid solvers.</li>
+                </ul>
+            </div>
+            <div class="image-wrapper" style="border-color: var(--accent);">
+                <img src="https://placehold.co/600x400/white/005088?text=Semantic+vs+Transform" alt="Comparison of compression artifacts">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 3: Method I - DCT Theory -->
+<div class="slide-container">
+    <h2 class="slide-title">Method I: Discrete Cosine Transform</h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div>
+                <p>The DCT converts spatial data into frequency components, concentrating signal energy in low-frequency coefficients.</p>
+                <div class="formula-container">
+                    <math xmlns="http://www.w3.org/1998/Math/MathML" display="math">
+                        <mi>F</mi><mo stretchy="false">(</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo stretchy="false">)</mo><mo>=</mo><mi>&#x03B1;</mi><mo stretchy="false">(</mo><mi>u</mi><mo stretchy="false">)</mo><mi>&#x03B1;</mi><mo stretchy="false">(</mo><mi>v</mi><mo stretchy="false">)</mo><mo>&#x2211;</mo><mo>&#x2211;</mo><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo>,</mo><mi>y</mi><mo stretchy="false">)</mo><mi>cos</mi><mo>[</mo><mo>...]</mo><mi>cos</mi><mo>[</mo><mo>...]</mo>
+                    </math>
+                </div>
+                <p style="font-size: 18px;">Implementation uses matrix-based `im2col` for fast block processing in MATLAB.</p>
+            </div>
+            <div class="image-wrapper">
+                <img src="https://placehold.co/600x400/white/005088?text=DCT+Block+Energy" alt="DCT basis functions">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 4: Method II - DWT Theory -->
+<div class="slide-container">
+    <h2 class="slide-title">Method II: Discrete Wavelet Transform</h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div class="bullet-list">
+                <ul>
+                    <li><strong>Multi-Level Decomposition:</strong> Analyzing signal in both space and frequency using Filter Banks.</li>
+                    <li><strong>Subbands:</strong> Separating Approximation (LL) from Details (LH, HL, HH).</li>
+                    <li><strong>Deadzone Quantization:</strong> Discarding unimportant detail coefficients.</li>
+                    <li><strong>Artifacts:</strong> Ringing or Gibbs phenomena near high-contrast edges.</li>
+                </ul>
+            </div>
+            <div class="image-wrapper">
+                <img src="https://placehold.co/600x400/white/005088?text=Wavelet+Subbands" alt="Wavelet subband decomposition">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 5: Section Header - PDE Expansion -->
+<div class="slide-container section-header">
+    <hr>
+    <h2>PDE-Based Compression</h2>
+    <p>Implementation details of the Edge-Based C Codec</p>
+</div>
+
+<!-- Slide 6: PDE Core Theory & Background Anchors -->
+<div class="slide-container">
+    <h2 class="slide-title">PDE-Based Theory: Stability Fixes</h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div class="bullet-list">
+                <ul>
+                    <li><strong>Laplace Equation:</strong> Reconstructing the background via $\Delta u = 0$.</li>
+                    <li><strong>The Dirichlet Problem:</strong> Solving the smoothest interpolation between "known pixels".</li>
+                    <li><strong>Background Anchoring (The Fix):</strong> Regular sampling and block variance tests to avoid color drift in uniform regions.</li>
+                    <li><strong>Mask Composition:</strong> Semantic Edges + Image Borders + Interior Anchors.</li>
+                </ul>
+            </div>
+            <div style="background: white; border-radius: 12px; padding: 20px; border: 2px solid var(--primary);">
+                <h3 style="color: var(--primary); margin-bottom: 10px;">Constraint Mask</h3>
+                <p style="font-size: 18px;">Stores 1-D color signal and binary mask. Mask is compressed using <strong>JBIG</strong> for optimal bitrates.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 7: Algorithmic Pipeline -->
+<div class="slide-container">
+    <h2 class="slide-title">Algorithmic Pipeline (C11 Implementation)</h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div class="bullet-list">
+                <h3 style="color: var(--primary); margin-bottom: 15px;">Encoder Stage</h3>
+                <ul>
+                    <li><strong>Gaussian Presmoothing:</strong> Separable 2D kernels for noise reduction.</li>
+                    <li><strong>Marr-Hildreth Variant:</strong> Edge detection via Laplacian magnitude thresholding.</li>
+                    <li><strong>Max-Lloyd Quantization:</strong> Iterative optimization of the 1-D color signal levels.</li>
+                    <li><strong>JBIG Encoding:</strong> Bit-packing the binary constraint mask.</li>
+                </ul>
+            </div>
+            <div class="bullet-list">
+                <h3 style="color: var(--primary); margin-bottom: 15px;">Decoder Stage</h3>
+                <ul>
+                    <li><strong>JBIG Decoding:</strong> Reconstructing the 2D grid mask.</li>
+                    <li><strong>Signal Scattering:</strong> Mapping 1-D quantized samples back to Dirichlet points.</li>
+                    <li><strong>Multigrid Solver:</strong> W-cycle iterations with restriction/relaxation for convergence.</li>
+                    <li><strong>Independent Channels:</strong> Parallel reconstruction of R, G, and B planes.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 8: The Multigrid Solver -->
+<div class="slide-container">
+    <h2 class="slide-title">Multigrid Solver: W-Cycle</h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div>
+                <p>Direct relaxation (Gauss-Seidel) is slow to propagate global color. We implement a <strong>Multigrid</strong> hierarchy.</p>
+                <div class="formula-container" style="font-size: 18px;">
+                    <strong>W-Cycle:</strong> Pre-smooth → Restrict → Coarse Solve (Recursive) → Prolongate → Post-smooth.
+                </div>
+                <p style="font-size: 18px;">Achieves faster convergence and eliminates local artifacts by solving the error on coarser resolutions.</p>
+            </div>
+            <div class="image-wrapper">
+                <img src="https://placehold.co/600x400/white/005088?text=W-Cycle+Hierarchy" alt="Multigrid visualization">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 9: Quantitative Performance -->
+<div class="slide-container">
+    <h2 class="slide-title">Benchmark Results</h2>
+    <div class="content-area">
+        <div class="chart-container">
+            <h3 style="margin-bottom: 20px;">PSNR Comparison (dB)</h3>
+            <div class="bar">
+                <div class="bar-label">DCT (JPEG)</div>
+                <div class="bar-track"><div class="bar-fill" style="width: 65%;">26.6 dB</div></div>
+            </div>
+            <div class="bar">
+                <div class="bar-label">DWT (J2K)</div>
+                <div class="bar-track"><div class="bar-fill" style="width: 78%; background: var(--accent);">28.1 dB</div></div>
+            </div>
+            <div class="bar">
+                <div class="bar-label">PDE Codec (C)</div>
+                <div class="bar-track"><div class="bar-fill" style="width: 95%; background: #005088;">33.65 dB</div></div>
+            </div>
+        </div>
+        <div style="margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <p style="font-size: 18px;"><strong>Bitrate:</strong> ~4.01 bpp (without entropy coding for 1-D signal).</p>
+            <p style="font-size: 18px;"><strong>Efficiency:</strong> JBIG compression on the mask contributes significantly to high PSNR/bpp ratios.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 10: Visual Qualitative Analysis -->
+<div class="slide-container">
+    <h2 class="slide-title">Visual Comparison: Spider-Man Case</h2>
+    <div class="content-area">
+        <div class="two-column" style="grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+            <div style="text-align: center;">
+                <div class="image-wrapper" style="height: 300px;"><img src="https://placehold.co/400x300/white/005088?text=Original" alt="Original"></div>
+                <p style="font-size: 16px; margin-top: 10px;"><strong>Input Image:</strong> High contrast illustration.</p>
+            </div>
+            <div style="text-align: center;">
+                <div class="image-wrapper" style="height: 300px;"><img src="https://placehold.co/400x300/white/005088?text=Edges+Only" alt="Edges only"></div>
+                <p style="font-size: 16px; margin-top: 10px;"><strong>Edges Only:</strong> Color bleeding and background drift.</p>
+            </div>
+            <div style="text-align: center;">
+                <div class="image-wrapper" style="height: 300px;"><img src="https://placehold.co/400x300/white/005088?text=Anchored+PDE" alt="Anchored PDE"></div>
+                <p style="font-size: 16px; margin-top: 10px;"><strong>Anchored PDE:</strong> Clean background + sharp edges.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 11: Conclusion & Future Work -->
+<div class="slide-container">
+    <h2 class="slide-title">Conclusion & Future Work</h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div class="bullet-list">
+                <ul>
+                    <li><strong>Key Takeaway:</strong> Geometry-based coding is superior for cartoon-like content where edges define semantic meaning.</li>
+                    <li><strong>PDE Strength:</strong> Homogeneous diffusion with background anchors solves the color-drift problem.</li>
+                    <li><strong>Optimization:</strong> JBIG and Multigrid solvers enable real-time performance on a CPU.</li>
+                    <li><strong>Future Improvements:</strong> Adding 1-D signal entropy coding (zstd/Huffman) and improving prolongation logic.</li>
+                </ul>
+            </div>
+            <div style="padding: 40px; background: var(--primary); color: white; border-radius: 12px; display: flex; align-items: center; text-align: center;">
+                <p style="font-size: 26px;">"Engineering stability into harmonic solvers enables practical second-generation codecs."</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 12: Q&A -->
+<div class="slide-container" style="background-color: var(--primary); color: white; text-align: center; justify-content: center;">
+    <h1 style="font-size: 80px; font-family: 'Merriweather', serif;">Thank You!</h1>
+    <p style="font-size: 28px; color: var(--accent);">Questions & Discussion</p>
+    <hr style="width: 200px; border: 2px solid var(--accent); margin: 40px auto;">
+    <div style="font-size: 20px;">
+        <p>Mustafa Efe Kurt</p>
+        <p>efekurt@itu.edu.tr</p>
+        <p style="margin-top: 20px; font-style: italic;">C11 Codec | JBIG | Multigrid W-Cycle</p>
+    </div>
+</div>
+
+</body>
+</html>
